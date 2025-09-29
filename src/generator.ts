@@ -16,7 +16,15 @@ interface ProjectConfig {
   packageManager: 'npm' | 'pnpm' | 'yarn';
 }
 
-export async function generateProject(projectName: string, options: any): Promise<void> {
+interface GenerateOptions {
+  defaults?: boolean;
+  withExamples?: boolean;
+  withCI?: boolean;
+  org?: string;
+  author?: string;
+}
+
+export async function generateProject(projectName: string, options: GenerateOptions): Promise<void> {
   const config = await collectConfig(projectName, options);
   const spinner = ora('Generating project files...').start();
 
@@ -48,7 +56,7 @@ export async function generateProject(projectName: string, options: any): Promis
   }
 }
 
-async function collectConfig(projectName: string, options: any): Promise<ProjectConfig> {
+async function collectConfig(projectName: string, options: GenerateOptions): Promise<ProjectConfig> {
   if (options.defaults) {
     return {
       projectName,
@@ -163,7 +171,7 @@ async function processTemplateVariables(config: ProjectConfig, projectPath: stri
 }
 
 async function initGitRepository(projectPath: string): Promise<void> {
-  const { spawn } = require('child_process');
+  const { spawn } = await import('child_process');
   
   return new Promise((resolve, reject) => {
     const git = spawn('git', ['init'], { cwd: projectPath, stdio: 'ignore' });
