@@ -1,0 +1,53 @@
+{
+  "name": "leo-sdk-template",
+  "version": "1.0.0",
+  "description": "Template for creating TypeScript SDK projects",
+  "variables": {
+    "projectName": {
+      "type": "string",
+      "required": true,
+      "description": "Name of the project"
+    },
+    "sdkName": {
+      "type": "string",
+      "required": true,
+      "description": "Name of the SDK class"
+    },
+    "org": {
+      "type": "string",
+      "required": true,
+      "description": "Organization name"
+    },
+    "author": {
+      "type": "string",
+      "required": true,
+      "description": "Author name"
+    },
+    "description": {
+      "type": "string",
+      "required": false,
+      "description": "Project description"
+    },
+    "withExamples": {
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "description": "Include example components"
+    },
+    "withCI": {
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "description": "Include CI/CD configuration"
+    }
+  },
+  "features": [
+    "TypeScript support",
+    "Rollup bundling",
+    "Jest testing",
+    "ESLint configuration",
+    "Multiple output formats (ES, CJS, UMD)",
+    "Example React application",
+    "GitHub Actions CI/CD"
+  ]
+}
