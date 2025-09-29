@@ -244,7 +244,18 @@ function main() {
     log('按 Ctrl+C 取消，或按 Enter 继续...', 'yellow');
     
     // 等待用户确认
-    require('child_process').execSync('pause', { stdio: 'inherit' });
+    const readline = require('readline');
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+    
+    await new Promise((resolve) => {
+      rl.question('', () => {
+        rl.close();
+        resolve();
+      });
+    });
 
     publish();
     pushToGit();
