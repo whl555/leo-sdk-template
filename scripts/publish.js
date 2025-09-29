@@ -224,7 +224,7 @@ function pushToGit() {
   }
 }
 
-function main() {
+async function main() {
   const versionType = process.argv[2];
 
   log('🚀 Leo SDK Template 发布流程开始', 'bright');
