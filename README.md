@@ -25,6 +25,7 @@ leo-sdk my-awesome-sdk --defaults
 ## Command Options
 
 - `--defaults` - Use default values for all prompts
+- `-v, --version` - Print the installed `leo-sdk` version
 - `--with-examples` - Copy example assets when the template provides them (current templates omit these by default)
 - `--with-ci` - Copy GitHub Actions workflows when available in the template
 - `--org <org>` - Set organization name

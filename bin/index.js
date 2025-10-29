@@ -3,11 +3,12 @@
 const { program } = require('commander');
 const { generateProject } = require('../dist/generator');
 const chalk = require('chalk');
+const { version } = require('../package.json');
 
 program
   .name('leo-sdk')
   .description('Generate a new TypeScript SDK project')
-  .version('1.0.0');
+  .version(version, '-v, --version', 'Output the current CLI version');
 
 program
   .argument('<project-name>', 'Name of the project to create')
