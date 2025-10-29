@@ -65,8 +65,11 @@ describe('Generator', () => {
     
     expect(mockFs.ensureDir).toHaveBeenCalledWith(testProjectPath);
     expect(mockFs.copy).toHaveBeenCalledWith(
-      expect.stringContaining(path.join('template', 'ts-lib', 'core')),
-      expect.any(String)
+      expect.stringContaining(path.join('template', 'ts-lib')),
+      testProjectPath,
+      expect.objectContaining({
+        filter: expect.any(Function)
+      })
     );
   });
 
@@ -130,8 +133,11 @@ describe('Generator', () => {
     await generateProject(testProjectName, options);
 
     expect(mockFs.copy).toHaveBeenCalledWith(
-      expect.stringContaining(path.join('template', 'react-lib', 'core')),
-      expect.any(String)
+      expect.stringContaining(path.join('template', 'react-lib')),
+      testProjectPath,
+      expect.objectContaining({
+        filter: expect.any(Function)
+      })
     );
   });
 });
