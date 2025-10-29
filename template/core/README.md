@@ -89,3 +89,4 @@ MIT © [<%= author %>]
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for details.
+

@@ -103,3 +103,7 @@ The template provides a solid foundation, but you can customize it:
 - Update TypeScript settings in `tsconfig.json`
 - Add more test configurations in `jest.config.js`
 - Extend the example application as needed
+
+
+
+

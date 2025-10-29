@@ -50,3 +50,4 @@ export interface BaseResult {
   createdAt: Date;
   updatedAt: Date;
 }
+

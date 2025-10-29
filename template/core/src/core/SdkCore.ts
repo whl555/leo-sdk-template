@@ -102,3 +102,4 @@ export class <%= sdkName %> {
 }
 
 export default <%= sdkName %>;
+
