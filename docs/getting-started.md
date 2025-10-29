@@ -25,39 +25,25 @@ leo-sdk my-awesome-sdk --defaults
 ## Command Options
 
 - `--defaults` - Use default values for all prompts
-- `--with-examples` - Include example React application
-- `--with-ci` - Include GitHub Actions CI/CD configuration
+- `--with-examples` - Copy example assets when the chosen template provides them (current templates omit these)
+- `--with-ci` - Copy GitHub Actions CI/CD configuration when available
 - `--org <org>` - Set organization name
 - `--author <author>` - Set author name
+- `--template <type>` - Choose between `ts-lib` (default) and `react-lib`
 
 ## Project Structure
 
-The generated project will have the following structure:
+Your project layout depends on the template you select.
 
-```
-my-awesome-sdk/
-├── src/
-│   ├── core/
-│   │   └── SdkCore.ts      # Main SDK class
-│   ├── types/
-│   │   └── index.ts        # TypeScript definitions
-│   ├── __tests__/
-│   │   └── index.test.ts   # Unit tests
-│   └── index.ts            # Main entry point
-├── example/                # React example (optional)
-│   ├── src/
-│   ├── package.json
-│   └── vite.config.ts
-├── .github/                # CI/CD workflows (optional)
-│   └── workflows/
-│       └── ci.yml
-├── dist/                   # Build output
-├── package.json
-├── tsconfig.json
-├── rollup.config.js
-├── jest.config.js
-└── README.md
-```
+### `ts-lib`
+
+- Focused on headless SDKs – provides a tiny client class in `src/index.ts` that you can extend.
+- Ships only `build`, `prepare`, and `release` scripts so you can publish without extra tooling.
+
+### `react-lib`
+
+- Tailored for component SDKs – exposes a minimal `SdkSection` component in `src/index.ts`.
+- Shares the same publish-friendly script set while keeping dependencies slim.
 
 ## Next Steps
 
@@ -71,38 +57,29 @@ my-awesome-sdk/
    npm install
    ```
 
-3. Start development:
-   ```bash
-   npm run dev
-   ```
-
-4. Run tests:
-   ```bash
-   npm test
-   ```
-
-5. Build for production:
+3. Build the project scaffold:
    ```bash
    npm run build
    ```
 
+4. Publish when ready:
+   ```bash
+   npm run release
+   ```
+
 ## Development Workflow
 
-1. **Implement your SDK logic** in `src/core/SdkCore.ts`
-2. **Define types** in `src/types/index.ts`
-3. **Write tests** in `src/__tests__/`
-4. **Update documentation** in `README.md`
-5. **Test with examples** in the `example/` directory
-6. **Build and publish** when ready
+- Extend the default code in `src/index.ts` to expose your SDK surface.
+- Update README instructions as you add functionality or tooling.
+- Add tests, examples, or CI as needed for your release process.
 
 ## Customization
 
 The template provides a solid foundation, but you can customize it:
 
-- Modify the build configuration in `rollup.config.js`
-- Update TypeScript settings in `tsconfig.json`
-- Add more test configurations in `jest.config.js`
-- Extend the example application as needed
+- Tweak TypeScript compiler options in `tsconfig.json` for your target consumers.
+- Introduce additional scripts (linting, testing, storybook) as your project grows.
+- Wire up CI or examples by adding the relevant folders and re-running the generator.
 
 
 

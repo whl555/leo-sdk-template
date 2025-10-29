@@ -13,7 +13,8 @@ jest.mock('prompts', () => ({
     description: 'Test SDK',
     withExamples: false,
     withCI: false,
-    packageManager: 'npm'
+    packageManager: 'npm',
+    templateType: 'ts-lib'
   }))
 }));
 jest.mock('ora', () => ({
@@ -50,11 +51,11 @@ describe('Generator', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockFs.ensureDir.mockResolvedValue();
-    mockFs.copy.mockResolvedValue();
-    mockFs.pathExists.mockResolvedValue(true);
-    mockFs.readFile.mockResolvedValue('test content');
-    mockFs.writeFile.mockResolvedValue();
+    mockFs.ensureDir.mockImplementation(async () => {});
+    mockFs.copy.mockImplementation(async () => {});
+    mockFs.pathExists.mockImplementation(async () => true);
+    mockFs.readFile.mockImplementation(async () => 'test content');
+    mockFs.writeFile.mockImplementation(async () => {});
   });
 
   it('should generate project with default options', async () => {
@@ -63,11 +64,16 @@ describe('Generator', () => {
     await generateProject(testProjectName, options);
     
     expect(mockFs.ensureDir).toHaveBeenCalledWith(testProjectPath);
-    expect(mockFs.copy).toHaveBeenCalled();
+    expect(mockFs.copy).toHaveBeenCalledWith(
+      expect.stringContaining(path.join('template', 'ts-lib', 'core')),
+      expect.any(String)
+    );
   });
 
   it('should handle project generation errors', async () => {
-    mockFs.ensureDir.mockRejectedValue(new Error('Permission denied'));
+    mockFs.ensureDir.mockImplementationOnce(async () => {
+      throw new Error('Permission denied');
+    });
     
     await expect(generateProject(testProjectName, {}))
       .rejects.toThrow('Permission denied');
@@ -78,12 +84,19 @@ describe('Generator', () => {
       defaults: true, 
       withExamples: true 
     };
+
+    mockFs.pathExists.mockImplementation(async (targetPath) => {
+      if (targetPath.includes('examples')) {
+        return false;
+      }
+      return true;
+    });
     
     await generateProject(testProjectName, options);
     
-    expect(mockFs.copy).toHaveBeenCalledWith(
+    expect(mockFs.copy).not.toHaveBeenCalledWith(
       expect.stringContaining('examples'),
-      expect.stringContaining('example')
+      expect.any(String)
     );
   });
 
@@ -92,12 +105,33 @@ describe('Generator', () => {
       defaults: true, 
       withCI: true 
     };
+
+    mockFs.pathExists.mockImplementation(async (targetPath) => {
+      if (targetPath.includes('ci')) {
+        return false;
+      }
+      return true;
+    });
     
     await generateProject(testProjectName, options);
     
-    expect(mockFs.copy).toHaveBeenCalledWith(
+    expect(mockFs.copy).not.toHaveBeenCalledWith(
       expect.stringContaining('ci'),
-      expect.stringContaining('.github')
+      expect.any(String)
+    );
+  });
+
+  it('should honour templateType overrides', async () => {
+    const options = {
+      defaults: true,
+      templateType: 'react-lib' as const
+    };
+
+    await generateProject(testProjectName, options);
+
+    expect(mockFs.copy).toHaveBeenCalledWith(
+      expect.stringContaining(path.join('template', 'react-lib', 'core')),
+      expect.any(String)
     );
   });
 });

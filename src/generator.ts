@@ -5,6 +5,10 @@ import prompts from 'prompts';
 import chalk from 'chalk';
 import ora from 'ora';
 
+const TEMPLATE_TYPES = ['react-lib', 'ts-lib'] as const;
+
+type TemplateType = typeof TEMPLATE_TYPES[number];
+
 interface ProjectConfig {
   projectName: string;
   sdkName: string;
@@ -14,6 +18,7 @@ interface ProjectConfig {
   withExamples: boolean;
   withCI: boolean;
   packageManager: 'npm' | 'pnpm' | 'yarn';
+  templateType: TemplateType;
 }
 
 interface GenerateOptions {
@@ -22,6 +27,7 @@ interface GenerateOptions {
   withCI?: boolean;
   org?: string;
   author?: string;
+  templateType?: TemplateType;
 }
 
 export async function generateProject(projectName: string, options: GenerateOptions): Promise<void> {
@@ -51,9 +57,13 @@ export async function generateProject(projectName: string, options: GenerateOpti
     console.log(chalk.white(`  ${config.packageManager} run dev`));
     
   } catch (error) {
-    spinner.fail('Failed to generate project');
+    spinner.fail(`Failed to generate project: ${error}`);
     throw error;
   }
+}
+
+function resolveTemplateType(candidate?: TemplateType): TemplateType {
+  return candidate && TEMPLATE_TYPES.includes(candidate) ? candidate : 'ts-lib';
 }
 
 async function collectConfig(projectName: string, options: GenerateOptions): Promise<ProjectConfig> {
@@ -61,12 +71,13 @@ async function collectConfig(projectName: string, options: GenerateOptions): Pro
     return {
       projectName,
       sdkName: projectName,
-      org: options.org || 'my-org',
-      author: options.author || 'Developer',
+      org: options.org || 'hollywood',
+      author: options.author || 'holly',
       description: `${projectName} SDK`,
       withExamples: options.withExamples || false,
       withCI: options.withCI || false,
-      packageManager: 'npm'
+      packageManager: 'npm',
+      templateType: resolveTemplateType(options.templateType)
     };
   }
 
@@ -81,7 +92,7 @@ async function collectConfig(projectName: string, options: GenerateOptions): Pro
       type: 'text' as const,
       name: 'org',
       message: 'Organization name:',
-      initial: options.org || 'my-org'
+      initial: options.org || 'hollywood'
     },
     {
       type: 'text' as const,
@@ -109,6 +120,16 @@ async function collectConfig(projectName: string, options: GenerateOptions): Pro
     },
     {
       type: 'select' as const,
+      name: 'templateType',
+      message: 'Template type:',
+      choices: TEMPLATE_TYPES.map((value) => ({
+        title: value === 'react-lib' ? 'React component SDK' : 'TypeScript library SDK',
+        value
+      })),
+      initial: Math.max(0, TEMPLATE_TYPES.indexOf(resolveTemplateType(options.templateType)))
+    },
+    {
+      type: 'select' as const,
       name: 'packageManager',
       message: 'Package manager:',
       choices: [
@@ -125,42 +146,69 @@ async function collectConfig(projectName: string, options: GenerateOptions): Pro
   return {
     projectName,
     sdkName: answers.sdkName || projectName,
-    org: answers.org || 'my-org',
-    author: answers.author || 'Developer',
+    org: answers.org || 'hollywood',
+    author: answers.author || 'holly',
     description: answers.description || `${projectName} SDK`,
     withExamples: answers.withExamples || false,
     withCI: answers.withCI || false,
-    packageManager: answers.packageManager || 'npm'
+    packageManager: answers.packageManager || 'npm',
+    templateType: resolveTemplateType(answers.templateType)
   };
 }
 
 async function copyTemplateFiles(config: ProjectConfig, projectPath: string): Promise<void> {
-  const templatePath = path.join(__dirname, '../template');
-  
+  const templateRoot = path.join(__dirname, '../template', config.templateType);
+
   // Copy core files
-  await fs.copy(path.join(templatePath, 'core'), projectPath);
-  
+  await fs.copy(path.join(templateRoot, 'core'), projectPath);
+
   // Copy examples if requested
   if (config.withExamples) {
-    await fs.copy(path.join(templatePath, 'examples'), path.join(projectPath, 'example'));
+    const examplesPath = path.join(templateRoot, 'examples');
+    if (await fs.pathExists(examplesPath)) {
+      await fs.copy(examplesPath, path.join(projectPath, 'example'));
+    }
   }
-  
+
   // Copy CI configuration if requested
   if (config.withCI) {
-    await fs.copy(path.join(templatePath, 'ci'), path.join(projectPath, '.github'));
+    const ciPath = path.join(templateRoot, 'ci');
+    if (await fs.pathExists(ciPath)) {
+      await fs.copy(ciPath, path.join(projectPath, '.github'));
+    }
   }
 }
 
 async function processTemplateVariables(config: ProjectConfig, projectPath: string): Promise<void> {
-  const templateFiles = [
-    'package.json',
-    'README.md',
-    'tsconfig.json',
-    'src/index.ts',
-    'src/types/index.ts'
-  ];
+  const templateFilesMap: Record<TemplateType, {
+    core: string[];
+    examples?: string[];
+    ci?: string[];
+  }> = {
+    'ts-lib': {
+      core: ['package.json', 'README.md', 'tsconfig.json', 'src/index.ts']
+    },
+    'react-lib': {
+      core: ['package.json', 'README.md', 'tsconfig.json', 'src/index.ts']
+    }
+  };
 
-  for (const file of templateFiles) {
+  const templateConfig = templateFilesMap[config.templateType];
+  if (!templateConfig) {
+    return;
+  }
+
+  const filesToProcess = new Set<string>(templateConfig.core);
+
+  if (config.withExamples && templateConfig.examples) {
+    templateConfig.examples.forEach((file) => filesToProcess.add(file));
+  }
+
+  if (config.withCI && templateConfig.ci) {
+    templateConfig.ci.forEach((file) => filesToProcess.add(file));
+  }
+
+  for (const file of filesToProcess) {
     const filePath = path.join(projectPath, file);
     if (await fs.pathExists(filePath)) {
       const content = await fs.readFile(filePath, 'utf-8');
