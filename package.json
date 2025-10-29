@@ -1,6 +1,6 @@
 {
   "name": "leo-sdk-template",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A template generator for creating TypeScript SDK projects",
   "main": "dist/index.js",
   "bin": {
