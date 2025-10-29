@@ -19,6 +19,7 @@ interface ProjectConfig {
   withCI: boolean;
   packageManager: 'npm' | 'pnpm' | 'yarn';
   templateType: TemplateType;
+  copyrightYear: number;
 }
 
 interface GenerateOptions {
@@ -77,7 +78,8 @@ async function collectConfig(projectName: string, options: GenerateOptions): Pro
       withExamples: options.withExamples || false,
       withCI: options.withCI || false,
       packageManager: 'npm',
-      templateType: resolveTemplateType(options.templateType)
+      templateType: resolveTemplateType(options.templateType),
+      copyrightYear: new Date().getFullYear()
     };
   }
 
@@ -98,7 +100,7 @@ async function collectConfig(projectName: string, options: GenerateOptions): Pro
       type: 'text' as const,
       name: 'author',
       message: 'Author name:',
-      initial: options.author || 'Developer'
+      initial: options.author || 'holly'
     },
     {
       type: 'text' as const,
@@ -152,15 +154,27 @@ async function collectConfig(projectName: string, options: GenerateOptions): Pro
     withExamples: answers.withExamples || false,
     withCI: answers.withCI || false,
     packageManager: answers.packageManager || 'npm',
-    templateType: resolveTemplateType(answers.templateType)
+    templateType: resolveTemplateType(answers.templateType),
+    copyrightYear: new Date().getFullYear()
   };
 }
 
 async function copyTemplateFiles(config: ProjectConfig, projectPath: string): Promise<void> {
   const templateRoot = path.join(__dirname, '../template', config.templateType);
 
-  // Copy core files
-  await fs.copy(path.join(templateRoot, 'core'), projectPath);
+  const optionalDirectories = new Set(['examples', 'ci']);
+
+  await fs.copy(templateRoot, projectPath, {
+    filter: (src) => {
+      const relative = path.relative(templateRoot, src);
+      if (!relative) {
+        return true;
+      }
+
+      const topLevel = relative.split(path.sep)[0];
+      return !optionalDirectories.has(topLevel);
+    }
+  });
 
   // Copy examples if requested
   if (config.withExamples) {
@@ -186,10 +200,10 @@ async function processTemplateVariables(config: ProjectConfig, projectPath: stri
     ci?: string[];
   }> = {
     'ts-lib': {
-      core: ['package.json', 'README.md', 'tsconfig.json', 'src/index.ts']
+      core: ['package.json', 'README.md', 'tsconfig.json', 'src/index.ts', 'LICENSE']
     },
     'react-lib': {
-      core: ['package.json', 'README.md', 'tsconfig.json', 'src/index.ts']
+      core: ['package.json', 'README.md', 'tsconfig.json', 'src/index.ts', 'LICENSE']
     }
   };
 
