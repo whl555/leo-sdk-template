@@ -26,9 +26,19 @@
   "scripts": {
     "clean": "rimraf dist",
     "build": "npm run clean && rollup -c",
+    "dev": "tsc -w",
     "test": "jest",
-    "prepare": "npm run build",
-    "release": "node scripts/publish.js"
+    "lint": "eslint src/**/*.ts",
+    "prepublishOnly": "npm run build && npm run test",
+    "cli:test": "node bin/index.js test-project --defaults",
+    "publish:current": "node scripts/publish.js",
+    "publish:patch": "node scripts/publish.js patch",
+    "publish:minor": "node scripts/publish.js minor",
+    "publish:major": "node scripts/publish.js major",
+    "publish:dry": "npm pack --dry-run",
+    "version:patch": "npm version patch",
+    "version:minor": "npm version minor",
+    "version:major": "npm version major"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",

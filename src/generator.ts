@@ -200,10 +200,10 @@ async function processTemplateVariables(config: ProjectConfig, projectPath: stri
     ci?: string[];
   }> = {
     'ts-lib': {
-      core: ['package.json', 'README.md', 'tsconfig.json', 'src/index.ts', 'LICENSE']
+      core: ['package.json', 'README.md', 'tsconfig.json', 'src/index.ts', 'src/__tests__/sdkClient.test.ts', 'LICENSE']
     },
     'react-lib': {
-      core: ['package.json', 'README.md', 'tsconfig.json', 'src/index.ts', 'LICENSE']
+      core: ['package.json', 'README.md', 'tsconfig.json', 'src/index.ts', 'src/__tests__/sdkSection.test.tsx', 'LICENSE']
     }
   };
 
