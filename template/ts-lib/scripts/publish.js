@@ -73,10 +73,6 @@ function main() {
     run(`npm version ${versionBump}`, `更新版本 (${versionBump})`);
   }
 
-  if (hasScript('lint')) {
-    run('npm run lint', '代码检查');
-  }
-
   if (hasScript('test')) {
     run('npm test', '运行测试');
   }

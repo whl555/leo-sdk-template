@@ -56,6 +56,7 @@ describe('Generator', () => {
     mockFs.pathExists.mockImplementation(async () => true);
     mockFs.readFile.mockImplementation(async () => 'test content');
     mockFs.writeFile.mockImplementation(async () => {});
+    mockFs.move.mockImplementation(async () => {});
   });
 
   it('should generate project with default options', async () => {
@@ -70,6 +71,12 @@ describe('Generator', () => {
       expect.objectContaining({
         filter: expect.any(Function)
       })
+    );
+
+    expect(mockFs.move).toHaveBeenCalledWith(
+      expect.stringContaining('_gitignore'),
+      expect.stringContaining('.gitignore'),
+      expect.objectContaining({ overwrite: true })
     );
   });
 

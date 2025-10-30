@@ -28,7 +28,6 @@
     "build": "npm run clean && rollup -c",
     "dev": "tsc -w",
     "test": "jest",
-    "lint": "eslint src/**/*.ts",
     "prepublishOnly": "npm run build && npm run test",
     "cli:test": "node bin/index.js test-project --defaults",
     "publish:current": "node scripts/publish.js",

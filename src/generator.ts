@@ -46,6 +46,8 @@ export async function generateProject(projectName: string, options: GenerateOpti
     // Process template variables
     await processTemplateVariables(config, projectPath);
 
+    await finalizeProjectFiles(projectPath);
+
     // Initialize git repository
     await initGitRepository(projectPath);
 
@@ -200,10 +202,10 @@ async function processTemplateVariables(config: ProjectConfig, projectPath: stri
     ci?: string[];
   }> = {
     'ts-lib': {
-      core: ['package.json', 'README.md', 'tsconfig.json', 'src/index.ts', 'src/__tests__/sdkClient.test.ts', 'LICENSE']
+      core: ['package.json', 'README.md', 'tsconfig.json', 'src/index.ts', 'src/__tests__/sdkClient.test.ts', 'LICENSE', 'jest.config.js']
     },
     'react-lib': {
-      core: ['package.json', 'README.md', 'tsconfig.json', 'src/index.ts', 'src/__tests__/sdkSection.test.tsx', 'LICENSE']
+      core: ['package.json', 'README.md', 'tsconfig.json', 'src/index.ts', 'src/__tests__/sdkSection.test.tsx', 'LICENSE', 'jest.config.js']
     }
   };
 
@@ -228,6 +230,20 @@ async function processTemplateVariables(config: ProjectConfig, projectPath: stri
       const content = await fs.readFile(filePath, 'utf-8');
       const processed = ejs.render(content, config);
       await fs.writeFile(filePath, processed);
+    }
+  }
+}
+
+async function finalizeProjectFiles(projectPath: string): Promise<void> {
+  const renamePairs: Array<{ from: string; to: string }> = [
+    { from: '_gitignore', to: '.gitignore' }
+  ];
+
+  for (const { from, to } of renamePairs) {
+    const fromPath = path.join(projectPath, from);
+    if (await fs.pathExists(fromPath)) {
+      const toPath = path.join(projectPath, to);
+      await fs.move(fromPath, toPath, { overwrite: true });
     }
   }
 }
